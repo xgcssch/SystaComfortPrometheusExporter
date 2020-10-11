@@ -7,9 +7,13 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 const maxBufferSize = 1024 * 64
@@ -49,42 +53,72 @@ func server(ctx context.Context, address string) (err error) {
 		for {
 			buffer := make([]byte, maxBufferSize)
 
-			n, addr, err := pc.ReadFrom(buffer)
+			_, addr, err := pc.ReadFrom(buffer)
 			if err != nil {
 				doneChan <- err
 				return
 			}
 
-			fmt.Printf("packet-received: bytes=%d from=%s\n", n, addr.String())
+			//fmt.Printf("packet-received: bytes=%d from=%s\n", n, addr.String())
 
-			type DataPacket struct {
-				//MacAddress [6]byte // 0-5
-				//Counter    uint16  // 6-7
-				//_          [8]byte // 8-15
-				//PacketType uint16  // 16
-				//_          [7]byte // 17-23
-				V1         [15]byte
-				PacketType byte
-				V2         [8]byte
-				Values     [232]int32
+			type ReceivePacket struct {
+				MacAddress [6]byte    // 0-5
+				Counter    uint16     // 6-7
+				_          [8]byte    // 8-15
+				PacketType byte       // 16
+				_          [7]byte    // 17-23
+				Values     [256]int32 // 24-1048
 			}
 
-			var dp DataPacket
+			type ResponsePacket struct {
+				MacAddress   [6]byte // 0-5
+				InputCounter uint16  // 6-7
+				_            [4]byte // 8-11
+				PacketType   byte    // 12
+				_            [3]byte // 13-15
+				PacketID     uint16  // 16-17
+				Counter      uint16  // 18-19
+			}
+
+			var dp ReceivePacket
 
 			br := bytes.NewReader(buffer)
 			binary.Read(br, binary.LittleEndian, &dp)
 
-			if dp.PacketType != 0 {
-				fmt.Printf("PacketType:%d\n", dp.PacketType)
-			} else {
-				fmt.Printf("Initial Packet\n")
+			switch dp.PacketType {
+			case 0:
+				//fmt.Printf("Initial Packet\n")
+			case 1:
+				var Aussentemperator = float64(dp.Values[0]) / 10
+				var VorlaufIst = float64(dp.Values[1]) / 10
+				var RuecklaufIst = float64(dp.Values[2]) / 10
+				fmt.Printf("Außentemperatur:%f\n", Aussentemperator)
+				fmt.Printf("Vorlauf:%f\n", VorlaufIst)
+				fmt.Printf("Rücklauf:%f\n", RuecklaufIst)
+
+				//fmt.Printf("PacketType:%d\n", dp.PacketType)
+				//for i := 0; i < 256; i++ {
+				//	fmt.Printf("%d -> %f\n", i, float64(dp.Values[i])/10)
+				//}
+			case 2:
+				var Aussentemperator = float64(dp.Values[60]) / 10
+				fmt.Printf("ST Außentemperatur:%f\n", Aussentemperator)
+
+				//fmt.Printf("PacketType:%d\n", dp.PacketType)
+				//for i := 0; i < 256; i++ {
+				//	fmt.Printf("%d -> %f\n", i, float64(dp.Values[i])/10)
+				//}
+			default:
+				//fmt.Printf("Unknown PacketType:%d\n", dp.PacketType)
 			}
 
-			replyBuffer := bytes.Repeat([]byte{0}, replyMsgLength)
-			replyBuffer[12] = 0x01
-
-			var i int = 88
-			fmt.Printf("%d", i)
+			var ReturnID uint16 = (uint16(dp.MacAddress[5]) << 8) + uint16(dp.MacAddress[4]) + macOffset
+			var Counter uint16 = dp.Counter + counterOffset
+			rp := ResponsePacket{dp.MacAddress, dp.Counter, [4]byte{0, 0, 0, 0}, 0x01, [3]byte{0, 0, 0}, ReturnID, Counter}
+			bw := bytes.NewBuffer(make([]byte, 0))
+			binary.Write(bw, binary.LittleEndian, &rp)
+			//
+			pc.WriteTo(bw.Bytes(), addr)
 		}
 	}()
 
@@ -118,6 +152,18 @@ func main() {
 		done <- true
 	}(cancel)
 	log.Print("Starting ...")
+
+	http.Handle("/metrics", promhttp.Handler())
+	s := &http.Server{
+		Addr:           ":2112",
+		Handler:        nil,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+		BaseContext:    func(net.Listener) context.Context { return ctx },
+	}
+	log.Fatal(s.ListenAndServe())
+	//http.ListenAndServe(":2112", nil)
 
 	err := server(ctx, ":22460")
 	if err != nil {
