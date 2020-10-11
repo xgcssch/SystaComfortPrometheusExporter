@@ -1,0 +1,81 @@
+name: Build all release artefacts
+
+on:
+  release:
+    types: [published, created, edited]
+  workflow_dispatch: {}
+
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v2
+      with:
+        go-version: ^1.15
+      id: go
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+
+    # We are using modules, so no need to get depencies
+    
+    - name: Build Linux amd64
+      env:
+        GOARCH: amd64
+        GOOS: linux
+      run: |
+        mkdir ${{github.workspace}}/bin/
+        go build -v -o ${{github.workspace}}/bin ./...&& mv ${{github.workspace}}/bin/SystaComfortPrometheusExporter ${{github.workspace}}/bin/SystaComfortPrometheusExporter_Linux_amd64
+
+    - name: Upload Linux amd64
+      uses: actions/upload-artifact@v2
+      with:
+        name: SystaComfortPrometheusExporter_Linux_amd64
+        path: |
+          ${{github.workspace}}/bin/SystaComfortPrometheusExporter_Linux_amd64
+
+    - name: Build Linux x86
+      env:
+        GOARCH: "386"
+        GOOS: linux
+      run: |
+        go build -v -o ${{github.workspace}}/bin ./...&& mv ${{github.workspace}}/bin/SystaComfortPrometheusExporter ${{github.workspace}}/bin/SystaComfortPrometheusExporter_Linux_x86
+
+    - name: Upload Linux x86
+      uses: actions/upload-artifact@v2
+      with:
+        name: SystaComfortPrometheusExporter_Linux_x86
+        path: |
+          ${{github.workspace}}/bin/SystaComfortPrometheusExporter_Linux_x86
+
+    - name: Build Linux arm
+      env:
+        GOARCH: arm
+        GOOS: linux
+      run: |
+        go build -v -o ${{github.workspace}}/bin ./...&& mv ${{github.workspace}}/bin/SystaComfortPrometheusExporter ${{github.workspace}}/bin/SystaComfortPrometheusExporter_Linux_arm
+
+    - name: Upload Linux arm
+      uses: actions/upload-artifact@v2
+      with:
+        name: SystaComfortPrometheusExporter_Linux_arm
+        path: |
+          ${{github.workspace}}/bin/SystaComfortPrometheusExporter_Linux_arm
+
+    - name: Build Windows x64
+      env:
+        GOARCH: amd64
+        GOOS: windows
+      run: |
+        go build -v -o ${{github.workspace}}/bin ./...
+
+    - name: Upload Windows x64
+      uses: actions/upload-artifact@v2
+      with:
+        name: SystaComfortPrometheusExporter_Windows_x64.exe
+        path: |
+          ${{github.workspace}}/bin/SystaComfortPrometheusExporter.exe
