@@ -1,3 +1,6 @@
+//
+// A perl script developed by Klaus.Schmidinger@tvdr.de
+
 package main
 
 import (
@@ -111,6 +114,50 @@ func server(ctx context.Context, address string) (err error) {
 				var Aussentemperator = float64(dp.Values[0]) / 10
 				var VorlaufIst = float64(dp.Values[1]) / 10
 				var RuecklaufIst = float64(dp.Values[2]) / 10
+				// 3=Brauchwasser
+				// 6=Zirkulation
+				// 9=Raumtemperatur
+				// 11=Kollektor
+				// 12=KesselVorlauf
+				// 13=KesselRuecklauf
+				// 22=BrauchwasserSoll
+				// 23=InnenSoll
+				// 34=KesselSoll
+				// 36=Betriebsart 0=Heiprogramm 1, 1=Heiprogramm 2, 2=Heiprogramm 3, 3=Dauernd Normal, 4=Dauernd Komfort, 5=Dauernd Absenken
+				// 39=Raumtemperatur normal (soll)
+				// 40=Raumtemperatur komfort (soll)
+				// 41=Raumtemperatur abgesenkt (soll)
+				// 48=Fusspunkt
+				// 50=Steilheit
+				// 52=Max. Vorlauftemperatur
+				// 53=Heizgrenze Heizbetrieb
+				// 54=Heizgrenze Absenken
+				// 55=Frostschutz Aussentemperatur
+				// 56=Vorhaltezeit Aufheizen
+				// 57=Raumeinfluss
+				// 58=Ueberhoehung Kessel
+				// 59=Spreizung Heizkreis
+				// 60=Minimale Drehzahl Pumpe PHK
+				// 62=Mischer Laufzeit
+				// 149=Brauchwassertemperatur normal
+				// 150=Brauchwassertemperatur komfort
+				// 155=Brauchwassertemperatur Schaltdifferenz
+				// 158=Nachlauf Pumpe PK/LP
+				// 162=Min. Laufzeit Kessel
+				// 169=Nachlaufzeit Pumpe PZ
+				// 171=Zirkulation Schaltdifferenz
+				// 179=Betriebszeit Kessel (Stunden)
+				// 180=Betriebszeit Kessel (Minuten)
+				// 181=Anzahl Brennerstarts
+				// 220=Aktive Relais (Bitpattern)
+				//   RelaisHeizkreispumpe    = 0x0001
+				//   RelaisLadepumpe         = 0x0080
+				//   RelaisZirkulationspumpe = 0x0100
+				//   RelaisKessel            = 0x0200
+				// Brenner aktiv wenn RelaisKessel && (KesselVorlauf - KesselRuecklauf > 2);
+				// 228=Fehlerstatus (255 = OK)
+				// 232=Status
+
 				fmt.Printf("Außentemperatur:%f\n", Aussentemperator)
 				systacomfortOutsideCelsius.Set(Aussentemperator)
 				fmt.Printf("Vorlauf:%f\n", VorlaufIst)
