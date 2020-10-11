@@ -13,6 +13,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -21,11 +23,16 @@ const counterOffset uint16 = 0x3FBF
 const macOffset uint16 = 0x8E83
 const replyMsgLength = 20
 
-func memset(a []byte, v byte) {
-	for i := range a {
-		a[i] = v
-	}
-}
+var (
+	systacomfortOutsideCelsius = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "systacomfort_outside_celsius",
+		Help: "The outside temperature",
+	})
+	systacomfortSolarheatOutsideCelsius = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "systacomfort_solarheat_celsius",
+		Help: "The outside temperature measured on the solar heating panel",
+	})
+)
 
 func server(ctx context.Context, address string) (err error) {
 	// ListenPacket provides us a wrapper around ListenUDP so that
@@ -46,6 +53,18 @@ func server(ctx context.Context, address string) (err error) {
 
 	doneChan := make(chan error, 1)
 
+	http.Handle("/metrics", promhttp.Handler())
+	s := &http.Server{
+		Addr:           ":2112",
+		Handler:        nil,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+		BaseContext:    func(net.Listener) context.Context { return ctx },
+	}
+	go func() {
+		log.Fatal(s.ListenAndServe())
+	}()
 	// Given that waiting for packets to arrive is blocking by nature and we want
 	// to be able of canceling such action if desired, we do that in a separate
 	// go routine.
@@ -93,6 +112,7 @@ func server(ctx context.Context, address string) (err error) {
 				var VorlaufIst = float64(dp.Values[1]) / 10
 				var RuecklaufIst = float64(dp.Values[2]) / 10
 				fmt.Printf("Außentemperatur:%f\n", Aussentemperator)
+				systacomfortOutsideCelsius.Set(Aussentemperator)
 				fmt.Printf("Vorlauf:%f\n", VorlaufIst)
 				fmt.Printf("Rücklauf:%f\n", RuecklaufIst)
 
@@ -103,6 +123,7 @@ func server(ctx context.Context, address string) (err error) {
 			case 2:
 				var Aussentemperator = float64(dp.Values[60]) / 10
 				fmt.Printf("ST Außentemperatur:%f\n", Aussentemperator)
+				systacomfortSolarheatOutsideCelsius.Set(Aussentemperator)
 
 				//fmt.Printf("PacketType:%d\n", dp.PacketType)
 				//for i := 0; i < 256; i++ {
@@ -152,18 +173,6 @@ func main() {
 		done <- true
 	}(cancel)
 	log.Print("Starting ...")
-
-	http.Handle("/metrics", promhttp.Handler())
-	s := &http.Server{
-		Addr:           ":2112",
-		Handler:        nil,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
-		MaxHeaderBytes: 1 << 20,
-		BaseContext:    func(net.Listener) context.Context { return ctx },
-	}
-	log.Fatal(s.ListenAndServe())
-	//http.ListenAndServe(":2112", nil)
 
 	err := server(ctx, ":22460")
 	if err != nil {
