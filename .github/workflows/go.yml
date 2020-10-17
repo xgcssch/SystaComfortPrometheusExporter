@@ -35,3 +35,5 @@ jobs:
 
     #- name: Test
     #  run: go test -v .
+    - name: Install Artefacts
+      run: go install -v github.com/xgcssch/SystaComfortPrometheusExporter/cmd/SystaComfortPrometheusExporter
