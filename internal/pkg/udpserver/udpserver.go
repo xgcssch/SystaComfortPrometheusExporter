@@ -1,7 +1,8 @@
 //
-// A perl script developed by Klaus.Schmidinger@tvdr.de
+//
+// Derived from a perl script developed by Klaus.Schmidinger@tvdr.de
 
-package main
+package udpserve
 
 import (
 	"bytes"
@@ -201,7 +202,8 @@ func server(ctx context.Context, address string) (err error) {
 	return
 }
 
-func main() {
+// StartupServer asdfasdfasdf
+func StartupServer(port int) {
 	sigs := make(chan os.Signal, 1)
 	done := make(chan bool, 1)
 
