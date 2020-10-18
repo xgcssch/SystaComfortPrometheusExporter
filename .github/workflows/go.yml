@@ -38,4 +38,4 @@ jobs:
       with:
         name: main-executable
         path: |
-          $MY_VAR/dist
+          $GOPATH/bin
