@@ -17,8 +17,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -27,16 +25,20 @@ const counterOffset uint16 = 0x3FBF
 const macOffset uint16 = 0x8E83
 const replyMsgLength = 20
 
-var (
-	systacomfortOutsideCelsius = promauto.NewGauge(prometheus.GaugeOpts{
-		Name: "systacomfort_outside_celsius",
-		Help: "The outside temperature",
-	})
-	systacomfortSolarheatOutsideCelsius = promauto.NewGauge(prometheus.GaugeOpts{
-		Name: "systacomfort_solarheat_celsius",
-		Help: "The outside temperature measured on the solar heating panel",
-	})
-)
+func transformToIndicator(indicator int32) float64 {
+	if indicator == 0 {
+		return float64(0)
+	}
+
+	return float64(1)
+}
+func transformBoolToIndicator(indicator bool) float64 {
+	if indicator {
+		return float64(0)
+	}
+
+	return float64(1)
+}
 
 func server(ctx context.Context, address string) (err error) {
 	// ListenPacket provides us a wrapper around ListenUDP so that
@@ -112,25 +114,42 @@ func server(ctx context.Context, address string) (err error) {
 			case 0:
 				//fmt.Printf("Initial Packet\n")
 			case 1:
-				var Aussentemperator = float64(dp.Values[0]) / 10
-				var VorlaufIst = float64(dp.Values[1]) / 10
-				var RuecklaufIst = float64(dp.Values[2]) / 10
-				// 3=Brauchwasser
-				// 6=Zirkulation
-				// 9=Raumtemperatur
+				// 0: Fühler Außentemperatur / OK
+				systacomfortOutsideTemperatureCelsius.Set(float64(dp.Values[0]) / 10)
+				// 1: Vorlauf Heizung / OK
+				systacomfortHeatercircuitSupplyTemperatureCelsius.Set(float64(dp.Values[1]) / 10)
+				// 2: Rücklauf Heizung / Looks good, but value does not match S-touch
+				systacomfortHeatercircuitReturnTemperatureCelsius.Set(float64(dp.Values[2]) / 10)
+				// 3=Brauchwasser TWO / OK
+				systacomfortTapwaterTemperatureCelsius.Set(float64(dp.Values[3]) / 10)
+				// 6=Zirkulation / OK
+				systacomfortCirculationTemperatureCelsius.Set(float64(dp.Values[6]) / 10)
+				// 9=Raumtemperatur / OK
+				systacomfortInsideTemperatureCelsius.Set(float64(dp.Values[9]) / 10)
 				// 11=Kollektor
-				// 12=KesselVorlauf
-				// 13=KesselRuecklauf
-				// 22=BrauchwasserSoll
-				// 23=InnenSoll
+				// 12=KesselVorlauf / OK
+				var BoilerSupplyTemperatureCelsius = float64(dp.Values[12]) / 10
+				systacomfortBoilerSupplyTemperatureCelsius.Set(BoilerSupplyTemperatureCelsius)
+				// 13=KesselRuecklauf / OK
+				var BoilerReturnTemperatureCelsius = float64(dp.Values[13]) / 10
+				systacomfortBoilerReturnTemperatureCelsius.Set(BoilerReturnTemperatureCelsius)
+				// 22=BrauchwasserSoll / OK
+				systacomfortTapwaterTargetTemperatureCelsius.Set(float64(dp.Values[22]) / 10)
+				// 23=InnenSoll / OK
+				systacomfortInsideTargetTemperatureCelsius.Set(float64(dp.Values[23]) / 10)
 				// 34=KesselSoll
+				systacomfortBoilerTargetTemperatureCelsius.Set(float64(dp.Values[34]) / 10)
 				// 36=Betriebsart 0=Heiprogramm 1, 1=Heiprogramm 2, 2=Heiprogramm 3, 3=Dauernd Normal, 4=Dauernd Komfort, 5=Dauernd Absenken
+				systacomfortModeInfo.Set(float64(dp.Values[36]))
 				// 39=Raumtemperatur normal (soll)
 				// 40=Raumtemperatur komfort (soll)
 				// 41=Raumtemperatur abgesenkt (soll)
-				// 48=Fusspunkt
-				// 50=Steilheit
+				// 48=Fusspunkt / OK
+				systacomfortHeatCurveRootPointCelsius.Set(float64(dp.Values[48]) / 10)
+				// 50=Steilheit / OK
+				systacomfortHeatCurveGradientCelsius.Set(float64(dp.Values[50]) / 10)
 				// 52=Max. Vorlauftemperatur
+				systacomfortBoilerSupplyUpperLimitCelsius.Set(float64(dp.Values[52]) / 10)
 				// 53=Heizgrenze Heizbetrieb
 				// 54=Heizgrenze Absenken
 				// 55=Frostschutz Aussentemperatur
@@ -147,31 +166,43 @@ func server(ctx context.Context, address string) (err error) {
 				// 162=Min. Laufzeit Kessel
 				// 169=Nachlaufzeit Pumpe PZ
 				// 171=Zirkulation Schaltdifferenz
-				// 179=Betriebszeit Kessel (Stunden)
-				// 180=Betriebszeit Kessel (Minuten)
-				// 181=Anzahl Brennerstarts
+				// 179=Betriebszeit Kessel (Stunden) / OK
+				// 180=Betriebszeit Kessel (Minuten) / OK
+				systacomfortBoilerRuntimeSeconds.Set((float64(dp.Values[179])*6 + float64(dp.Values[180])/10) * 60)
+				// 181=Anzahl Brennerstarts / OK
+				systacomfortBoilerStartsTotal.Set(float64(dp.Values[181]))
 				// 220=Aktive Relais (Bitpattern)
 				//   RelaisHeizkreispumpe    = 0x0001
 				//   RelaisLadepumpe         = 0x0080
 				//   RelaisZirkulationspumpe = 0x0100
 				//   RelaisKessel            = 0x0200
 				// Brenner aktiv wenn RelaisKessel && (KesselVorlauf - KesselRuecklauf > 2);
-				// 228=Fehlerstatus (255 = OK)
-				// 232=Status
+				relayState := dp.Values[220]
+				fmt.Printf("relais -> %d\n", dp.Values[220])
+				systacomfortBoilerHeatercircuitPumpInfo.Set(transformToIndicator(relayState & 0x0001))
+				systacomfortBoilerLoadpumpInfo.Set(transformToIndicator(relayState & 0x0080))
+				systacomfortBoilerCirculationPumpInfo.Set(transformToIndicator(relayState & 0x0100))
+				systacomfortBoilerActiveInfo.Set(transformToIndicator(relayState & 0x0200))
 
-				fmt.Printf("Außentemperatur:%f\n", Aussentemperator)
-				systacomfortOutsideCelsius.Set(Aussentemperator)
-				fmt.Printf("Vorlauf:%f\n", VorlaufIst)
-				fmt.Printf("Rücklauf:%f\n", RuecklaufIst)
+				systacomfortBoilerTorchInfo.Set(transformBoolToIndicator((relayState&0x0200) != 0 && (BoilerSupplyTemperatureCelsius-BoilerReturnTemperatureCelsius > 2)))
+
+				// 228=Fehlerstatus (255 = OK)
+				systacomfortBoilerErrorInfo.Set(float64(dp.Values[228]))
+				fmt.Printf("228 -> %d\n", dp.Values[228])
+				// 248=Status
+				systacomfortBoilerStatusInfo.Set(float64(dp.Values[248]))
+				// All State candidates
+				// fmt.Printf("42 -> %d\n", dp.Values[42])
+				// fmt.Printf("232 -> %d\n", dp.Values[232])
+				// fmt.Printf("231 -> %d\n", dp.Values[231])
+				// fmt.Printf("248 -> %d\n", dp.Values[248])
 
 				//fmt.Printf("PacketType:%d\n", dp.PacketType)
 				//for i := 0; i < 256; i++ {
 				//	fmt.Printf("%d -> %f\n", i, float64(dp.Values[i])/10)
 				//}
 			case 2:
-				var Aussentemperator = float64(dp.Values[60]) / 10
-				fmt.Printf("ST Außentemperatur:%f\n", Aussentemperator)
-				systacomfortSolarheatOutsideCelsius.Set(Aussentemperator)
+				systacomfortSolarpanelOutsideTemperatureCelsius.Set(float64(dp.Values[60]) / 10)
 
 				//fmt.Printf("PacketType:%d\n", dp.PacketType)
 				//for i := 0; i < 256; i++ {
