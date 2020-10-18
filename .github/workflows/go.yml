@@ -38,4 +38,4 @@ jobs:
       with:
         name: main-executable
         path: |
-          $GOPATH/bin
+          ${GOPATH}/bin
