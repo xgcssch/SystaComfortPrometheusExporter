@@ -1,9 +1,17 @@
-FROM golang:1.15
+FROM golang:alpine as builder
 
-WORKDIR /go/src/app
+WORKDIR /go/app
 COPY . .
 
-RUN go build -v ./... 
-RUN go install -v ./...
+RUN mkdir bin && \
+    CGO_ENABLED=0 GOOS=linux go build -v -o bin ./... && \
+    go install -v ./...
 
-CMD ["app"]
+FROM alpine:latest
+# docker run -it systa /bin/ash
+
+RUN apk --no-cache add ca-certificates
+WORKDIR /root/
+COPY --from=builder /go/app/bin/SystaComfortPrometheusExporter .
+
+CMD ["./SystaComfortPrometheusExporter"]
