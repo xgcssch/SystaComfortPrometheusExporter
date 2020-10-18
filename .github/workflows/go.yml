@@ -31,6 +31,8 @@ jobs:
     #  run: go test -v .
 
     - name: Install Artefacts
+      env:
+        GOBIN:  ${{github.workspace}}/bin
       run: go install -v github.com/xgcssch/SystaComfortPrometheusExporter/cmd/SystaComfortPrometheusExporter
 
     - name: Archive production artifacts
@@ -38,4 +40,4 @@ jobs:
       with:
         name: main-executable
         path: |
-          ${{env.GOPATH}}/bin
+          ${{github.workspace}}/bin
