@@ -152,9 +152,29 @@ var (
 		Help: "State of the boiler",
 	})
 
+	// Kollektortempratur TSA
+	systacomfortSolarpanelTemperatureCelsius = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "systacomfort_solarpanel_temperature_celsius",
+		Help: "The temperature of the liquid in solar heating panel",
+	})
+	// Solar Rücklauf
+	systacomfortSolarpanelReturnTemperatureCelsius = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "systacomfort_solarpanel_return_temperature_celsius",
+		Help: "The temperature of the liquid streaming from the solar heating panel",
+	})
+	// Solar Vorlauf
+	systacomfortSolarpanelSupplyTemperatureCelsius = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "systacomfort_solarpanel_supply_temperature_celsius",
+		Help: "The temperature of the liquid streaming into the solar heating panel",
+	})
 	// Außentemperatur Kollektor TAM
 	systacomfortSolarpanelOutsideTemperatureCelsius = promauto.NewGauge(prometheus.GaugeOpts{
-		Name: "systacomfort_solarpanel_temperature_celsius",
+		Name: "systacomfort_solarpanel_outside_temperature_celsius",
 		Help: "The outside temperature measured on the solar heating panel",
+	})
+	// Maximale Kollektortemperatur
+	systacomfortSolarpanelMaximumTemperatureCelsius = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "systacomfort_solarpanel_maximum_temperature_celsius",
+		Help: "Maximum temperature of the liquid in the solar panal today",
 	})
 )

@@ -202,7 +202,17 @@ func server(ctx context.Context, address string) (err error) {
 				//	fmt.Printf("%d -> %f\n", i, float64(dp.Values[i])/10)
 				//}
 			case 2:
+				// 56: TSA / OK
+				systacomfortSolarpanelTemperatureCelsius.Set(float64(dp.Values[56]) / 10)
+				// 57: Solar Rücklauf / OK
+				systacomfortSolarpanelReturnTemperatureCelsius.Set(float64(dp.Values[57]) / 10)
+				// 59: Solar Vorlauf / OK
+				systacomfortSolarpanelSupplyTemperatureCelsius.Set(float64(dp.Values[59]) / 10)
+				// 60: Temparatur Kollektor TAM / OK
 				systacomfortSolarpanelOutsideTemperatureCelsius.Set(float64(dp.Values[60]) / 10)
+				// 63: Maximale Kollektortemperatur / OK
+				systacomfortSolarpanelMaximumTemperatureCelsius.Set(float64(dp.Values[63]) / 10)
+				// 86: Solar Speicher oben TWO (=Warmwasser ist) / OK
 
 				//fmt.Printf("PacketType:%d\n", dp.PacketType)
 				//for i := 0; i < 256; i++ {
