@@ -1,5 +1,6 @@
 //
 // A perl script developed by Klaus.Schmidinger@tvdr.de
+// go run github.com/xgcssch/SystaComfortPrometheusExporter/cmd/SystaComfortPrometheusExporter
 
 package main
 
