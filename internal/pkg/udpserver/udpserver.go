@@ -127,12 +127,12 @@ func server(ctx context.Context, address string) (err error) {
 				// 9=Raumtemperatur / OK
 				systacomfortInsideTemperatureCelsius.Set(float64(dp.Values[9]) / 10)
 				// 11=Kollektor
-				// 12=KesselVorlauf / OK
-				var BoilerSupplyTemperatureCelsius = float64(dp.Values[12]) / 10
-				systacomfortBoilerSupplyTemperatureCelsius.Set(BoilerSupplyTemperatureCelsius)
-				// 13=KesselRuecklauf / OK
-				var BoilerReturnTemperatureCelsius = float64(dp.Values[13]) / 10
+				// 12=KesselRuecklauf / OK
+				var BoilerReturnTemperatureCelsius = float64(dp.Values[12]) / 10
 				systacomfortBoilerReturnTemperatureCelsius.Set(BoilerReturnTemperatureCelsius)
+				// 13=KesselVorlauf / OK
+				var BoilerSupplyTemperatureCelsius = float64(dp.Values[13]) / 10
+				systacomfortBoilerSupplyTemperatureCelsius.Set(BoilerSupplyTemperatureCelsius)
 				// 22=BrauchwasserSoll / OK
 				systacomfortTapwaterTargetTemperatureCelsius.Set(float64(dp.Values[22]) / 10)
 				// 23=InnenSoll / OK
