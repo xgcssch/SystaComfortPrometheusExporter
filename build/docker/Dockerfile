@@ -1,3 +1,6 @@
+# Build with
+# docker build -t SystaComfortPrometheusExporter -f build/docker/Dockerfile .
+# from root directory
 FROM golang:alpine as builder
 
 WORKDIR /go/app
