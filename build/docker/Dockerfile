@@ -13,6 +13,9 @@ RUN mkdir bin && \
 FROM alpine:latest
 # docker run -it systa /bin/ash
 
+EXPOSE 22460/udp
+EXPOSE 2112/tcp
+
 RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 COPY --from=builder /go/app/bin/SystaComfortPrometheusExporter .
