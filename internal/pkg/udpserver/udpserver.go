@@ -1,6 +1,7 @@
 //
+// This file contains the
 //
-// Derived from a perl script developed by Klaus.Schmidinger@tvdr.de
+// Derived from work by Klaus.Schmidinger@tvdr.de
 
 package udpserve
 
@@ -8,6 +9,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/binary"
+	"fmt"
 	"log"
 	"net"
 	"net/http"
@@ -15,6 +17,7 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+	"unsafe"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -24,22 +27,15 @@ const counterOffset uint16 = 0x3FBF
 const macOffset uint16 = 0x8E83
 const replyMsgLength = 20
 
-func transformToIndicator(indicator int32) float64 {
-	if indicator == 0 {
-		return float64(0)
-	}
-
-	return float64(1)
-}
-func transformBoolToIndicator(indicator bool) float64 {
-	if indicator {
-		return float64(0)
-	}
-
-	return float64(1)
-}
-
-func server(ctx context.Context, address string) (err error) {
+func server(
+	// Context in which the Server will run
+	ctx context.Context,
+	// Port to use for the HTTP Server
+	prometheusPort int,
+	// URL on which the metrics will be published
+	prometheusUrl string,
+	// Optionally dumps all received values
+	dumpValues bool) (err error) {
 	// ListenPacket provides us a wrapper around ListenUDP so that
 	// we don't need to call `net.ResolveUDPAddr` and then subsequentially
 	// perform a `ListenUDP` with the UDP address.
@@ -47,7 +43,7 @@ func server(ctx context.Context, address string) (err error) {
 	// The returned value (PacketConn) is pretty much the same as the one
 	// from ListenUDP (UDPConn) - the only difference is that `Packet*`
 	// methods and interfaces are more broad, also covering `ip`.
-	pc, err := net.ListenPacket("udp", address)
+	pc, err := net.ListenPacket("udp", ":22460")
 	if err != nil {
 		return
 	}
@@ -58,9 +54,10 @@ func server(ctx context.Context, address string) (err error) {
 
 	doneChan := make(chan error, 1)
 
-	http.Handle("/metrics", promhttp.Handler())
+	// Setup HTTP handler for Prometheus exporter
+	http.Handle(prometheusUrl, promhttp.Handler())
 	s := &http.Server{
-		Addr:           ":2112",
+		Addr:           fmt.Sprintf(":%d", prometheusPort),
 		Handler:        nil,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
@@ -78,13 +75,15 @@ func server(ctx context.Context, address string) (err error) {
 		for {
 			buffer := make([]byte, maxBufferSize)
 
-			_, addr, err := pc.ReadFrom(buffer)
+			bytecount, addr, err := pc.ReadFrom(buffer)
 			if err != nil {
 				doneChan <- err
 				return
 			}
 
-			//fmt.Printf("packet-received: bytes=%d from=%s\n", n, addr.String())
+			if dumpValues {
+				fmt.Printf("packet-received: bytes=%d from=%s\n", bytecount, addr.String())
+			}
 
 			type ReceivePacket struct {
 				MacAddress [6]byte    // 0-5
@@ -107,6 +106,10 @@ func server(ctx context.Context, address string) (err error) {
 
 			var dp ReceivePacket
 
+			// Discard too small packages
+			if unsafe.Sizeof(dp) > uintptr(bytecount) {
+				continue
+			}
 			br := bytes.NewReader(buffer)
 			binary.Read(br, binary.LittleEndian, &dp)
 
@@ -196,11 +199,6 @@ func server(ctx context.Context, address string) (err error) {
 				// fmt.Printf("232 -> %d\n", dp.Values[232])
 				// fmt.Printf("231 -> %d\n", dp.Values[231])
 				// fmt.Printf("248 -> %d\n", dp.Values[248])
-
-				//fmt.Printf("PacketType:%d\n", dp.PacketType)
-				//for i := 0; i < 256; i++ {
-				//	fmt.Printf("%d -> %f\n", i, float64(dp.Values[i])/10)
-				//}
 			case 2:
 				// 56: TSA / OK
 				systacomfortSolarpanelTemperatureCelsius.Set(float64(dp.Values[56]) / 10)
@@ -213,13 +211,14 @@ func server(ctx context.Context, address string) (err error) {
 				// 63: Maximale Kollektortemperatur / OK
 				systacomfortSolarpanelMaximumTemperatureCelsius.Set(float64(dp.Values[63]) / 10)
 				// 86: Solar Speicher oben TWO (=Warmwasser ist) / OK
-
-				//fmt.Printf("PacketType:%d\n", dp.PacketType)
-				//for i := 0; i < 256; i++ {
-				//	fmt.Printf("%d -> %f\n", i, float64(dp.Values[i])/10)
-				//}
 			default:
-				//fmt.Printf("Unknown PacketType:%d\n", dp.PacketType)
+			}
+
+			if dumpValues && dp.PacketType > 0 {
+				fmt.Printf("PacketType:%d\n", dp.PacketType)
+				for i := 0; i < 255; i++ {
+					fmt.Printf("%d -> 0x%08x %10d %f\n", i, dp.Values[i], uint(dp.Values[i]), float64(dp.Values[i])/10)
+				}
 			}
 
 			var ReturnID uint16 = (uint16(dp.MacAddress[5]) << 8) + uint16(dp.MacAddress[4]) + macOffset
@@ -234,8 +233,6 @@ func server(ctx context.Context, address string) (err error) {
 
 	select {
 	case <-ctx.Done():
-		//fmt.Println("cancelled")
-		//err = ctx.Err()
 		err = nil
 	case err = <-doneChan:
 	}
@@ -243,8 +240,11 @@ func server(ctx context.Context, address string) (err error) {
 	return
 }
 
-// StartupServer asdfasdfasdf
-func StartupServer(port int) {
+// StartupServer Start listening on the UDP Port 22460 for Monitoring packets from the heat control
+func StartupServer(
+	prometheusPort int,
+	prometheusUrl string,
+	dumpValues bool) {
 	sigs := make(chan os.Signal, 1)
 	done := make(chan bool, 1)
 
@@ -253,10 +253,7 @@ func StartupServer(port int) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	go func(cancel context.CancelFunc) {
-		//sig := <-sigs
 		<-sigs
-		//fmt.Println()
-		//fmt.Println(sig)
 
 		cancel()
 
@@ -264,7 +261,10 @@ func StartupServer(port int) {
 	}(cancel)
 	log.Print("Now listening for events ...")
 
-	err := server(ctx, ":22460")
+	err := server(ctx,
+		prometheusPort,
+		prometheusUrl,
+		dumpValues)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -1,13 +1,24 @@
 //
-// A perl script developed by Klaus.Schmidinger@tvdr.de
-// go run github.com/xgcssch/SystaComfortPrometheusExporter/cmd/SystaComfortPrometheusExporter
+// Main entry for the SystaComfort Prometheus exporter
+//
 
 package main
 
 import (
+	"flag"
+
 	internal "github.com/xgcssch/SystaComfortPrometheusExporter/internal/pkg/udpserver"
 )
 
+var prometheusPort = flag.Int("port", 2112, "Port to use exposing the exporter")
+var prometheusUrl = flag.String("url", "/metrics", "URL where the metrics are exposed")
+var dumpValues = flag.Bool("dump", false, "Dump values received from heating controller")
+
 func main() {
-	internal.StartupServer(22460)
+	flag.Parse()
+
+	internal.StartupServer(
+		*prometheusPort,
+		*prometheusUrl,
+		*dumpValues)
 }
