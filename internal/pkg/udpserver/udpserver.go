@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/binary"
-	"fmt"
 	"log"
 	"net"
 	"net/http"
@@ -71,6 +70,7 @@ func server(ctx context.Context, address string) (err error) {
 	go func() {
 		log.Fatal(s.ListenAndServe())
 	}()
+
 	// Given that waiting for packets to arrive is blocking by nature and we want
 	// to be able of canceling such action if desired, we do that in a separate
 	// go routine.
@@ -178,7 +178,7 @@ func server(ctx context.Context, address string) (err error) {
 				//   RelaisKessel            = 0x0200
 				// Brenner aktiv wenn RelaisKessel && (KesselVorlauf - KesselRuecklauf > 2);
 				relayState := dp.Values[220]
-				fmt.Printf("relais -> %d\n", dp.Values[220])
+				//fmt.Printf("relais -> %d\n", dp.Values[220])
 				systacomfortBoilerHeatercircuitPumpInfo.Set(transformToIndicator(relayState & 0x0001))
 				systacomfortBoilerLoadpumpInfo.Set(transformToIndicator(relayState & 0x0080))
 				systacomfortBoilerCirculationPumpInfo.Set(transformToIndicator(relayState & 0x0100))
@@ -188,7 +188,7 @@ func server(ctx context.Context, address string) (err error) {
 
 				// 228=Fehlerstatus (255 = OK)
 				systacomfortBoilerErrorInfo.Set(float64(dp.Values[228]))
-				fmt.Printf("228 -> %d\n", dp.Values[228])
+				//fmt.Printf("228 -> %d\n", dp.Values[228])
 				// 248=Status
 				systacomfortBoilerStatusInfo.Set(float64(dp.Values[248]))
 				// All State candidates
@@ -262,13 +262,13 @@ func StartupServer(port int) {
 
 		done <- true
 	}(cancel)
-	log.Print("Starting ...")
+	log.Print("Now listening for events ...")
 
 	err := server(ctx, ":22460")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	log.Print("Ended ...")
+	log.Print("Ended")
 	//!-
 }
