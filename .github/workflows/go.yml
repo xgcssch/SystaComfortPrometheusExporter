@@ -1,4 +1,4 @@
-name: Go
+name: Build all release artefacts
 
 on:
   #push:
@@ -28,8 +28,8 @@ jobs:
     
     - name: Build Linux amd64
       env:
-        GOARCH:amd64
-	GOOS=linux
+        GOARCH: amd64
+        GOOS: linux
       run: |
         go build -v -o ${{github.workspace}}/bin ./...&& mv ${{github.workspace}}/bin/SystaComfortPrometheusExporter ${{github.workspace}}/bin/SystaComfortPrometheusExporter_Linux_amd64
 
@@ -42,8 +42,8 @@ jobs:
 
     - name: Build Linux x86
       env:
-        GOARCH:386
-	GOOS=linux
+        GOARCH: "386"
+        GOOS: linux
       run: |
         go build -v -o ${{github.workspace}}/bin ./...&& mv ${{github.workspace}}/bin/SystaComfortPrometheusExporter ${{github.workspace}}/bin/SystaComfortPrometheusExporter_Linux_x86
 
@@ -56,8 +56,8 @@ jobs:
 
     - name: Build Linux arm
       env:
-        GOARCH:arm
-	GOOS=linux
+        GOARCH: arm
+        GOOS: linux
       run: |
         go build -v -o ${{github.workspace}}/bin ./...&& mv ${{github.workspace}}/bin/SystaComfortPrometheusExporter ${{github.workspace}}/bin/SystaComfortPrometheusExporter_Linux_arm
 
@@ -70,8 +70,8 @@ jobs:
 
     - name: Build Windows x64
       env:
-        GOARCH:amd64
-	GOOS=windows
+        GOARCH: amd64
+        GOOS: windows
       run: |
         go build -v -o ${{github.workspace}}/bin ./...
 
