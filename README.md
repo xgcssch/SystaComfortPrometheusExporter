@@ -128,7 +128,7 @@ docker run -d --name grafana \
 To further configure *Grafana* follow these steps:
 1. Login into Grafana at `http://192.168.100.4:3000`. Initial username and password are `admin`.
 1. Goto `Configuration` -> `Datasources`, and press the `Add Datasource` button. Select `Prometheus` and enter `http://192.168.100.4:9090` as the URL. Press `Test and Save`.
-1. Download the [dashboard template](https://gitcdn.link/repo/xgcssch/SystaComfortPrometheusExporter/main/assets/grafana/SystaComfort-Dashboard.json?token=ABPBBPT35DIFD5GQJ26MV7K7SVTN4) from Github.
+1. Download the [dashboard template](https://github.com/xgcssch/SystaComfortPrometheusExporter/blob/main/assets/grafana/SystaComfort-Dashboard.json) from Github.
 1. Continue to `Create`-> `Import` and select the downloaded file for import. Choose `Prometheus` as the datasource.
 1. *Grafana* should display the data.
 
