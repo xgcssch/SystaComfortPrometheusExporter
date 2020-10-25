@@ -50,7 +50,8 @@ paradigma.remoteportal.de. 0    IN      A       192.168.100.4
 If you are on a windows machine, use `nslookup paradigma.remoteportal.de` to check.
 ## Configure *SystaComfort* Controller
 There is a *Serviceprogramm Paradigma* which is normally used by maintainance personal. Below the menu group entry *Options* there is an entry called *Networksettings SystaComfort II*. When selected, it displays the Network settings of the controller. In the lower half there is a property sheet with two pages: the second is labeled *Portal*. Select this page. There are two checkboxes: the first, *Remoteportal aktiv* must be checked to enable the data transmissions. The second, *Verschlüsselung aktiv* should not be checked, as we have no information how to decrypt the data.
-![Screenshot of the network configuration](/xgcssch/SystaComfortPrometheusExporter/doc/assets/NetworkSettings.png)
+
+![Screenshot of the network configuration](https://github.com/xgcssch/SystaComfortPrometheusExporter/raw/main/doc/assets/NetworkSettings.png)
 
 # As a docker container
 The easiest way to install the exporter if you already have a device with *Docker* running, is to use a container.
@@ -127,7 +128,8 @@ docker run -d --name grafana \
 To further configure *Grafana* follow these steps:
 1. Login into Grafana at `http://192.168.100.4:3000`. Initial username and password are `admin`.
 1. Goto `Configuration` -> `Datasources`, and press the `Add Datasource` button. Select `Prometheus` and enter `http://192.168.100.4:9090` as the URL. Press `Test and Save`.
-1. Download the [dashboard template](/xgcssch/SystaComfortPrometheusExporter/blob/main/assets/grafana/SystaComfort-Dashboard.json) from Github.
+1. Download the [dashboard template](https://gitcdn.link/repo/xgcssch/SystaComfortPrometheusExporter/main/assets/grafana/SystaComfort-Dashboard.json?token=ABPBBPT35DIFD5GQJ26MV7K7SVTN4) from Github.
 1. Continue to `Create`-> `Import` and select the downloaded file for import. Choose `Prometheus` as the datasource.
 1. *Grafana* should display the data.
-![Screenshot of the Grafana dashboard](/xgcssch/SystaComfortPrometheusExporter/doc/assets/GrafanaDashboard.png)
+
+![Screenshot of the Grafana dashboard](https://github.com/xgcssch/SystaComfortPrometheusExporter/raw/main/doc/assets/GrafanaDashboard.png)
