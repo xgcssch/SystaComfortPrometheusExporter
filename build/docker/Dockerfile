@@ -7,7 +7,7 @@ WORKDIR /go/app
 COPY . .
 
 RUN mkdir bin && \
-    CGO_ENABLED=0 GOOS=linux go build -v -o bin ./... && \
+    GOOS=linux go build -v -o bin ./... && \
     go install -v ./...
 
 FROM alpine:latest

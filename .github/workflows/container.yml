@@ -1,0 +1,31 @@
+name: Build container images
+
+on:
+  release:
+    types: [published, created, edited]
+  workflow_dispatch: {}
+
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: checkout code
+        uses: actions/checkout@v2
+
+      - name: install buildx
+        id: buildx
+        uses: crazy-max/ghaction-docker-buildx@v1
+        with:
+          version: latest
+
+      - name: login to docker hub
+        run: echo "${{ secrets.DOCKERHUBPASSWORD }}" | docker login -u "${{ secrets.DOCKERHUBUSERNAME }}" --password-stdin
+
+      - name: build the image
+        run: |
+          docker buildx build \
+            --tag xgcssch/systacomfortprometheusexporter:latest \
+            --platform linux/amd64,linux/arm/v7,linux/arm64 .
