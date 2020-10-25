@@ -32,8 +32,13 @@ jobs:
           username: ${{ secrets.DOCKERHUBUSERNAME }}
           password: ${{ secrets.DOCKERHUBPASSWORD }}
 
-      - name: build the image
-        run: |
-          docker buildx build \
-            --tag xgcssch/systacomfortprometheusexporter:latest \
-            --platform linux/amd64,linux/arm/v7,linux/arm64 -f build/Dockerfile .
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: |
+            xgcssch/systacomfortprometheusexporter:latest
+            xgcssch/systacomfortprometheusexporter:v1.0.0-alpha
+          file: ./build/docker/Dockerfile
+          platforms: linux/amd64,linux/arm/v7,linux/arm64
