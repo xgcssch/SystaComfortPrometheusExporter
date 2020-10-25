@@ -36,4 +36,4 @@ jobs:
         run: |
           docker buildx build \
             --tag xgcssch/systacomfortprometheusexporter:latest \
-            --platform linux/amd64,linux/arm/v7,linux/arm64 .
+            --platform linux/amd64,linux/arm/v7,linux/arm64 -f build/Dockerfile .
