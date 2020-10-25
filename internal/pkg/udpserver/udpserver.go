@@ -33,7 +33,7 @@ func server(
 	// Port to use for the HTTP Server
 	prometheusPort int,
 	// URL on which the metrics will be published
-	prometheusUrl string,
+	prometheusURL string,
 	// Optionally dumps all received values
 	dumpValues bool) (err error) {
 	// ListenPacket provides us a wrapper around ListenUDP so that
@@ -243,7 +243,7 @@ func server(
 // StartupServer Start listening on the UDP Port 22460 for Monitoring packets from the heat control
 func StartupServer(
 	prometheusPort int,
-	prometheusUrl string,
+	prometheusURL string,
 	dumpValues bool) {
 	sigs := make(chan os.Signal, 1)
 	done := make(chan bool, 1)
