@@ -28,6 +28,7 @@ jobs:
         GOARCH: amd64
         GOOS: linux
       run: |
+        mkdir ${{github.workspace}}/bin/
         go build -v -o ${{github.workspace}}/bin ./...&& mv ${{github.workspace}}/bin/SystaComfortPrometheusExporter ${{github.workspace}}/bin/SystaComfortPrometheusExporter_Linux_amd64
 
     - name: Upload Linux amd64
