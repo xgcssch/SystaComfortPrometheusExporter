@@ -55,7 +55,7 @@ func server(
 	doneChan := make(chan error, 1)
 
 	// Setup HTTP handler for Prometheus exporter
-	http.Handle(prometheusUrl, promhttp.Handler())
+	http.Handle(prometheusURL, promhttp.Handler())
 	s := &http.Server{
 		Addr:           fmt.Sprintf(":%d", prometheusPort),
 		Handler:        nil,
@@ -263,7 +263,7 @@ func StartupServer(
 
 	err := server(ctx,
 		prometheusPort,
-		prometheusUrl,
+		prometheusURL,
 		dumpValues)
 	if err != nil {
 		log.Fatal(err)
