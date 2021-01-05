@@ -5,20 +5,29 @@
 package main
 
 import (
-	"flag"
+    "flag"
 
-	internal "github.com/xgcssch/SystaComfortPrometheusExporter/internal/pkg/udpserver"
+    internal "github.com/xgcssch/SystaComfortPrometheusExporter/internal/pkg/udpserver"
+    "k8s.io/klog/v2"
 )
 
+var registerGoCollector = flag.Bool("registerGoCollector", false, "Register the GO collector")
+var registerProcessCollector = flag.Bool("registerProcessCollector", false, "Register the process collector")
 var prometheusPort = flag.Int("port", 2112, "Port to use exposing the exporter")
 var prometheusURL = flag.String("url", "/metrics", "URL where the metrics are exposed")
-var dumpValues = flag.Bool("dump", false, "Dump values received from heating controller")
 
 func main() {
-	flag.Parse()
+    klog.InitFlags(nil)
+    flag.Parse()
 
-	internal.StartupServer(
-		*prometheusPort,
-		*prometheusURL,
-		*dumpValues)
+    klog.Info("SystaComfortPrometheusExporter v0.1 starting")
+
+    Configuration := internal.ProgramConfiguration{
+        PrometheusPort:  *prometheusPort,
+        PrometheusURL: *prometheusURL,
+        RegisterGoCollector: *registerGoCollector,
+        RegisterProcessCollector: *registerProcessCollector,
+    }
+
+    internal.StartupServer( Configuration )
 }

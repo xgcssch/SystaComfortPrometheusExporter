@@ -10,7 +10,6 @@ import (
     "context"
     "encoding/binary"
     "fmt"
-    "log"
     "net"
     "net/http"
     "os"
@@ -21,6 +20,7 @@ import (
 
     "github.com/prometheus/client_golang/prometheus"
     "github.com/prometheus/client_golang/prometheus/promhttp"
+    "k8s.io/klog/v2"
 )
 
 const maxBufferSize = 1024 * 64
@@ -31,12 +31,8 @@ const replyMsgLength = 20
 func server(
     // Context in which the Server will run
     ctx context.Context,
-    // Port to use for the HTTP Server
-    prometheusPort int,
-    // URL on which the metrics will be published
-    prometheusURL string,
-    // Optionally dumps all received values
-    dumpValues bool) (err error) {
+    // Configuration of the Server
+    configuration ProgramConfiguration) (err error) {
     // ListenPacket provides us a wrapper around ListenUDP so that
     // we don't need to call `net.ResolveUDPAddr` and then subsequentially
     // perform a `ListenUDP` with the UDP address.
@@ -55,23 +51,25 @@ func server(
 
     reg := prometheus.NewPedanticRegistry()
 
-	//reg.MustRegister(
-	//	prometheus.NewProcessCollector(prometheus.ProcessCollectorOpts{}),
-	//	prometheus.NewGoCollector(),
-	//)
+    if configuration.RegisterGoCollector {
+        reg.MustRegister( prometheus.NewGoCollector() )
+    }
+    if configuration.RegisterProcessCollector {
+        reg.MustRegister( prometheus.NewProcessCollector(prometheus.ProcessCollectorOpts{}) )
+    }
 
     registerCounter(reg)
 
     doneChan := make(chan error, 1)
 
     // Setup HTTP handler for Prometheus exporter
-    http.Handle(prometheusURL, 
+    http.Handle(configuration.PrometheusURL, 
         promhttp.HandlerFor(
             reg, 
             promhttp.HandlerOpts{}))
 
     s := &http.Server{
-        Addr:           fmt.Sprintf(":%d", prometheusPort),
+        Addr:           fmt.Sprintf(":%d", configuration.PrometheusPort),
         Handler:        nil,
         ReadTimeout:    10 * time.Second,
         WriteTimeout:   10 * time.Second,
@@ -79,7 +77,7 @@ func server(
         BaseContext:    func(net.Listener) context.Context { return ctx },
     }
     go func() {
-        log.Fatal(s.ListenAndServe())
+        klog.Fatal(s.ListenAndServe())
     }()
 
     // Given that waiting for packets to arrive is blocking by nature and we want
@@ -95,9 +93,7 @@ func server(
                 return
             }
 
-            if dumpValues {
-                fmt.Printf("packet-received: bytes=%d from=%s\n", bytecount, addr.String())
-            }
+            klog.V(4).Infof("packet-received: bytes=%d from=%s\n", bytecount, addr.String())
 
             type ReceivePacket struct {
                 MacAddress [6]byte    // 0-5
@@ -228,10 +224,10 @@ func server(
             default:
             }
 
-            if dumpValues && dp.PacketType > 0 {
-                fmt.Printf("PacketType:%d\n", dp.PacketType)
+            if dp.PacketType > 0 {
+                klog.V(5).Infof("PacketType:%d\n", dp.PacketType)
                 for i := 0; i < 255; i++ {
-                    fmt.Printf("%d -> 0x%08x %10d %f\n", i, dp.Values[i], uint(dp.Values[i]), float64(dp.Values[i])/10)
+                    klog.V(5).Infof("%d -> 0x%08x %10d %f\n", i, dp.Values[i], uint(dp.Values[i]), float64(dp.Values[i])/10)
                 }
             }
 
@@ -254,11 +250,17 @@ func server(
     return
 }
 
+// ProgramConfiguration asdf
+type ProgramConfiguration struct {
+    PrometheusPort  int
+    PrometheusURL   string
+    RegisterGoCollector bool
+    RegisterProcessCollector bool
+}
+
 // StartupServer Start listening on the UDP Port 22460 for Monitoring packets from the heat control
 func StartupServer(
-    prometheusPort int,
-    prometheusURL string,
-    dumpValues bool) {
+    configuration ProgramConfiguration) {
     sigs := make(chan os.Signal, 1)
     done := make(chan bool, 1)
 
@@ -273,16 +275,12 @@ func StartupServer(
 
         done <- true
     }(cancel)
-    log.Print("Now listening for events ...")
 
-    err := server(ctx,
-        prometheusPort,
-        prometheusURL,
-        dumpValues)
+    err := server(ctx, configuration )
     if err != nil {
-        log.Fatal(err)
+        klog.Fatal(err)
     }
 
-    log.Print("Ended")
+    klog.Info("Ended")
     //!-
 }
