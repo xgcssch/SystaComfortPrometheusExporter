@@ -23,7 +23,8 @@ All of these software components can be run on small devices like a [Rasperry Pi
 ## Configure your DNS
 The DNS Name `paradigma.remoteportal.de` must point to the device where the exporter is running. In this sample this is the Address `192.168.100.4`.
 
-Every internet router has it's own method to set such an entry. Some models are even incapble of overriding DNS addresses. If you own such device, there is no easy way to overcome the problem. One way is to install a local DNS server in your network. Unfortunatly this is not an easy thing to do and falls outside the scope of this document.
+Every internet router has it's own method to set such an entry. Some models are even incapble of overriding DNS addresses. If you own such device, there is no easy way to overcome the problem. One way is to install a local DNS server in your network, override the DNS Name there and only point the SystaComfort to that specific DNS Server. Unfortunatly this is not an easy thing to do and falls outside the scope of this document.
+See here for doing this with an [Rasperry Pi](https://www.deviceplus.com/raspberry-pi/how-to-use-a-raspberry-pi-as-a-dns-server/) or with a [Container](https://github.com/opsxcq/docker-dnsmasq)
 
 But if you were able to spoof the address, you should see an output like this if you query the address:
 ```
