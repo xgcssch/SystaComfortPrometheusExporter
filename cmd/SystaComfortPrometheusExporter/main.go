@@ -11,7 +11,7 @@ import (
 )
 
 var prometheusPort = flag.Int("port", 2112, "Port to use exposing the exporter")
-var prometheusUrl = flag.String("url", "/metrics", "URL where the metrics are exposed")
+var prometheusURL = flag.String("url", "/metrics", "URL where the metrics are exposed")
 var dumpValues = flag.Bool("dump", false, "Dump values received from heating controller")
 
 func main() {
@@ -19,6 +19,6 @@ func main() {
 
 	internal.StartupServer(
 		*prometheusPort,
-		*prometheusUrl,
+		*prometheusURL,
 		*dumpValues)
 }
