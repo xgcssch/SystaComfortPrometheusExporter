@@ -1,6 +1,8 @@
 # SystaComfortPrometheusExporter
 Intercepts UDP Status Packets from a SystaComfort Heating controller and makes them available to Prometheus
 
+Die Deutsche Übersetzung findet ihr [hier](https://github.com/xgcssch/SystaComfortPrometheusExporter/blob/main/README_de.md).
+
 # Motivation
 If you are an owner of a *SystaComfort* Heating from [Paradigma](https://www.paradigma.de/), then you have limited possibilities to monitor the
 device: You can use a mobile app called [S-Touch](https://www.paradigma.de/produkte/regelungen/s-touch-app/) which just exposes the current values or minimalistic graphics or an webbased remote portal. There are neither Open APIs nor interfaces to common monitoring or control tools like MQTT.
