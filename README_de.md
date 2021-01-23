@@ -64,7 +64,7 @@ Möglichkeit haben die Daten zu entschlüsseln.
 Die einfachste Methode den Exporter zu installieren ist, wenn Sie bereits ein Gerät haben auf welchem eine Containerumgebung wie Docker läuft.
 
 In diesem Fall reicht es den Container bspw. mit
-```
+```Shell
 docker run -d --name systacomfortexporter \
     -p 22460:22460/udp \
     -p 2112:2112/tcp \
@@ -140,4 +140,190 @@ Um *Grafana* weiter zu Konfigurieren führen Sie diese Schritte aus:
 1. Nach `Create`-> `Import` gehen und dort die heruntergeladene Datei zum Import auswählen. `Prometheus` als Datenquelle angeben.
 1. *Grafana* sollte danach bereits das Dashboard mit den aktuellen Daten anzeigen.
 
-![Screenshot of the Grafana dashboard](https://github.com/xgcssch/SystaComfortPrometheusExporter/raw/main/doc/assets/GrafanaDashboard.png)
+![Screenshot des Grafana Dashboards](https://github.com/xgcssch/SystaComfortPrometheusExporter/raw/main/doc/assets/GrafanaDashboard.png)
+# Fehlersuche
+1. Sicherstellen, dass die DNS Auflösung von der *SystaComfort II* aus korrekt funktionert.
+
+   Dafür muss man im *Serviceprogramm Paradigma* unter `Optionen`-> `Netzwerkeinstellungen SystaComfort II` die aktuellen Netzwerkeinstellungen anschauen:
+
+   ![Screenshot der Basis-Netzwerkkonfiguration](https://github.com/xgcssch/SystaComfortPrometheusExporter/raw/main/doc/assets/NetworkSettings-DNS.png)
+
+   Der dort eingetragene DNS-Server muss die Adresse `paradigma.remoteportal.de` desjenigen Servers zurückliefern, auf welchem der Exporter läuft.
+   
+   In dem folgenden Beispiel läuft der Exporter auf dem Rechner mit der IP `192.168.100.4` und der DNS Server ist wie in der Abbildung ersichtlich die `192.168.100.3`
+
+   >Ist der DNS Server nicht der gewünschte Server => diesen korrigieren!
+
+   Beispiel für Windows:
+   ```Batchfile
+   C:\>nslookup paradigma.remoteportal.de 192.168.100.3
+   Server:  mikrotik-main.int.schau.org
+   Address:  192.168.100.3
+   
+   Nicht autorisierende Antwort:
+   Name:    paradigma.remoteportal.de
+   Address:  192.168.100.4
+   ```
+   Beispiel für Unix:
+   ```Shell
+   [root@minerva ~]# host paradigma.remoteportal.de 192.168.100.3
+   Using domain server:
+   Name: 192.168.100.3
+   Address: 192.168.100.3#53
+   Aliases:
+   
+   paradigma.remoteportal.de has address 192.168.100.4
+   ```
+
+   >Liefert die Abfrage nicht das gewünschte Ergebnis: DNS Konfiguration prüfen!
+1. Wenn ein Dockercontainer verwendet wird: überprüfen, ob das Portmapping korrekt spezifiziert wurde.
+   
+   Dafür auf dem Docker Host folgendes Kommando absetzen:
+
+   ```Shell
+   soenke@nas01:/$ docker inspect --format='{{range $p, $conf := .NetworkSettings.Ports}} {{$p}} -> {{(index $conf 0).HostPort}} {{end}}' systacomfortexporter
+   2112/tcp -> 2112  22460/udp -> 22460
+   ```
+   Das Ergebnis sollte 
+   
+   a) `22460/udp -> 22460` enhalten, damit die UDP Pakete von der Heizung an den Container weitergeleitet werden und 
+   
+   b) `2112/tcp -> 2112` damit Anforderungen an den Prometheus Exporter weitergeleitet werden.
+
+   >Sind die Portmappings nicht vorhanden => `docker run ...` Kommando überprüfen!
+
+1. Sicherstellen, dass UDP Daten von der Heizung auf dem (Docker-)Host ankommen.
+   
+   Falls der (Docker-)Host ein *ix basierendes System ist, kann `tcpdump`verwendet werden:
+   ```Shell
+   bash-4.3# tcpdump udp port 22460
+   tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
+   listening on eth0, link-type EN10MB (Ethernet), capture size 262144 bytes
+   20:43:14.579978 IP 192.168.100.250.8002 > nas01.int.schau.org.22460: UDP, length 1048
+   20:43:14.580366 IP nas01.int.schau.org.22460 > 192.168.100.250.8002: UDP, length 20
+   20:43:14.620267 IP 192.168.100.250.8002 > nas01.int.schau.org.22460: UDP, length 1048
+   20:43:14.620644 IP nas01.int.schau.org.22460 > 192.168.100.250.8002: UDP, length 20
+   20:43:14.660629 IP 192.168.100.250.8002 > nas01.int.schau.org.22460: UDP, length 1048
+   20:43:14.660894 IP nas01.int.schau.org.22460 > 192.168.100.250.8002: UDP, length 20
+   20:43:14.700913 IP 192.168.100.250.8002 > foresnas01.int.schau.org.22460: UDP, length 192
+   ^C
+   7 packets captured
+   8 packets received by filter
+   0 packets dropped by kernel
+   ```
+
+   >Werden keine Pakete angezeigt => Netzwerkkonfiguration zwischen Heizung und (Docker-)Host prüfen!
+
+1. Sicherstellen, dass UDP Daten von der Heizung in dem Dockercontainer ankommen.
+   
+   Dafür müssen wir eine Shell in den Container öffnen, `tcpdump` installieren und ausführen:
+
+   ```Shell
+   bash-4.3# docker exec -it systacomfortexporter ash
+   ~ # tcpdump
+   ash: tcpdump: not found
+   ~ # apk update
+   fetch http://dl-cdn.alpinelinux.org/alpine/v3.12/main/x86_64/APKINDEX.tar.gz
+   fetch http://dl-cdn.alpinelinux.org/alpine/v3.12/community/x86_64/APKINDEX.tar.gz
+   v3.12.3-76-ged1baecfad [http://dl-cdn.alpinelinux.org/alpine/v3.12/main]
+   v3.12.3-74-g09e375413f [http://dl-cdn.alpinelinux.org/alpine/v3.12/community]
+   OK: 12747 distinct packages available
+   ~ # apk add tcpdump
+   (1/2) Installing libpcap (1.9.1-r2)
+   (2/2) Installing tcpdump (4.9.3-r2)
+   Executing busybox-1.31.1-r19.trigger
+   OK: 7 MiB in 17 packages
+   ~ # tcpdump udp port 22460
+   tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
+   listening on eth0, link-type EN10MB (Ethernet), capture size 262144 bytes
+   19:55:08.157164 IP 172.17.0.1.35359 > 8115f53e1933.22460: UDP, length 1048
+   19:55:08.157594 IP 8115f53e1933.22460 > 172.17.0.1.35359: UDP, length 20
+   19:55:08.197455 IP 172.17.0.1.35359 > 8115f53e1933.22460: UDP, length 1048
+   19:55:08.197663 IP 8115f53e1933.22460 > 172.17.0.1.35359: UDP, length 20
+   19:55:08.237742 IP 172.17.0.1.35359 > 8115f53e1933.22460: UDP, length 1048
+   19:55:08.237892 IP 8115f53e1933.22460 > 172.17.0.1.35359: UDP, length 20
+   19:55:08.278079 IP 172.17.0.1.35359 > 8115f53e1933.22460: UDP, length 192
+   ^C
+   7 packets captured
+   7 packets received by filter
+   0 packets dropped by kernel
+   ~ exit
+   ```
+   >Werden keine Pakete angezeigt => Netzwerkkonfiguration des Dockerhostes in Zusammenhang mit dem Container prüfen!
+1. Sicherstellen, dass die exportierten Daten des Containers abgefragt werden können.
+   
+   Dazu mit Hilfe von `curl` den Endpunkt abfragen:
+
+   ```
+   luna $ curl http://192.168.100.4:2112/metrics
+   # HELP systacomfort_boiler_active_info Is the boiler is running
+   # TYPE systacomfort_boiler_active_info gauge
+   systacomfort_boiler_active_info 0
+   # HELP systacomfort_boiler_circulationpump_info Is the boiler circulation pump running
+   # TYPE systacomfort_boiler_circulationpump_info gauge
+   systacomfort_boiler_circulationpump_info 1
+   ...
+   ```
+   >Werden keine Werte oder eine Fehlermeldung angezeigt => Netzwerkkonfiguration des Containers prüfen!
+
+1. Sicherstellen, dass die Heizungswerte auch exportiert werden.
+   
+   Sind bei dem vorigen Schritt Daten zu sehen gewesen, welche ungleich `0` waren, dann kann man davon ausgehen, dass die Daten vom Exporter empfangen und verarbeitet wurden.
+
+   Bspw.
+
+   ```
+   ...
+   # HELP systacomfort_heatercircuit_return_temperature_celsius The boiler return temperature
+   # TYPE systacomfort_heatercircuit_return_temperature_celsius gauge
+   systacomfort_heatercircuit_return_temperature_celsius 27.4
+   # HELP systacomfort_heatercircuit_supply_temperature_celsius The boiler supply temperature
+   # TYPE systacomfort_heatercircuit_supply_temperature_celsius gauge
+   systacomfort_heatercircuit_supply_temperature_celsius 30.6
+   ...
+   ```
+
+   Ist dieses nicht der Fall, so kann man das Progamm auch mit erweiterten Ausgaben starten. Am Besten startet man den Container auch interaktiv, damit man dessen Ausgaben direkt sehen kann:
+
+   ```Shell
+   docker run -it -p 22460:22460/udp -p 2112:2112/tcp xgcssch/systacomfortprometheusexporter /root/SystaComfortPrometheusExporter -v 4
+   ```
+   
+   Relevant ist hier das `-v` Flag. Eine Stufe von `4` gibt das Programm bei jedem UDP Paket einen Hinweis aus. Bei Stufe `5` dumpt er zusätzlich die Werte.
+
+   > Bitte daran denken, dass nur ein Exportercontainer gleichzeitig laufen kann. Ggf. ist ein anderer Container vorher zu beenden.
+
+# FAQ
+1. Du hast eine Frage oder einen Fehler gefunden? Möchtest du Verbesserungsvorschläge machen?
+
+   Dann beginne eine Diskussion oder lege einen Issue an. Gerne auch in Deutscher Sprache. Ich habe die Hauptseite zwar in Englisch erstellt, jedoch sind bisher alle mir bekannten Anwender aus dem Deutschen Sprachbereich. Sollte sich das als Fehlannahme erweisen, so können wir dieses dann ändern ;-) 
+
+1. Wo bekomme ich das *Serviceprogramm Paradigma* her?
+
+   Das Programm kann man nur über den Heizungsbauer oder *Paradigma* direkt erhalten. Mir wurde das Programm freundlicherweise bereits bei der Installation der Heizung von meinem Heizungsbauer zur Verfügung gestellt. Generell bin ich der Ansicht, dass solche Programme genau wie eine Bedienungsanleitung zum Lieferumfang gehören sollten. Falls ihr keinen Kontakt zu einem Heizungsbauer habt, würde ich es direkt über *Paradigma* versuchen zu erhalten. Die Kontaktseite befindet sich [hier.](https://www.paradigma.de/unternehmen/kontakt/)
+   
+1. Mit welcher *SystaComfort II* Version läuft der Exporter?
+
+   Ich kann im Augenblick nur von meiner Anlage definitiv sagen, dass es läuft:
+   
+   ![Screenshot der Systemversion](https://github.com/xgcssch/SystaComfortPrometheusExporter/raw/main/doc/assets/Systemversion.jpg)
+
+   Die Version wurde letztes Jahr von meinem Heizungsbauer aktualisiert. Ich kann nicht sagen welche Version vorher aktiv war, nur dass diese ebenfalls korrekt Daten geliefert hat.
+   
+1. Ich habe einen Router, mit dem ich keine DNS Namen anpassen kann (bspw. Fritzbox)
+
+   Eine Möglichkeit besteht darin, auf dem Dockerhost zustätzlich einen Container mit einem DNS Server zu fahren und den DNS Server in der *SystaComfort II* Steuerung explizit auf diesen zu verweisen.
+   
+   Bspw. 
+
+   ```Shell
+   docker run -p 53:53/tcp -p 53:53/udp --cap-add=NET_ADMIN andyshinn/dnsmasq:2.75 -S 192.168.100.1 --address=/paradigma.remoteportal.de/192.168.100.4
+   ```
+
+   wobei `192.168.100.4` die IP des Dockerhostes ist, auf dem der Exporter Container läuft und `192.168.100.1` die IP des Routers bzw. des lokalen DNS Servers.
+
+1. Ich hätte gerne noch den Wert xyz exportiert?
+
+   Prima! Bekommen wir hin, wenn du weißt wo in den übermittelten Daten sich der relevante Wert befindet. Mach einen Issue auf, oder noch besser: erstelle einen Pull Request mit dem entsprechenden Code.
+
+
