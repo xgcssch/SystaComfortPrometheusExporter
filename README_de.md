@@ -55,8 +55,9 @@ paradigma.remoteportal.de. 0    IN      A       192.168.100.4
 Haben Sie einen Windows Rechner, so verwenden Sie `nslookup paradigma.remoteportal.de` zur Abfrage.
 ## Konfiguration der  *SystaComfort II* Heizungssteuerung
 Es gibt ein *Serviceprogramm Paradigma*, welches vom Heizungsbauer zur Konfiguration verwendet wird. Unterhalb des Menüeintrages *Einstellungen* findet sich ein Eintrag *Netzwerkeinstellungen SystaComfort II*. Wählt man diesen aus, so werden die Netzwerkeinstellungen angezeigt. In der unteren Hälfte befindet sich ein Bereich mit zwei Reitern, der zweite ist mit *Portal* bezeichnet. 
-Diesen wählt man aus. Dort wiederum befinden sich zwei Checkboxen: *Remoteportal aktiv* und *Verschlüsselung aktiv*. Die erste Option muss dabei ausgewählt sein, die Zweite nicht, da wir keine 
-Möglichkeit haben die Daten zu entschlüsseln.
+Diesen wählt man aus. Dort wiederum befinden sich zwei Checkboxen: *Remoteportal aktiv* und *Verschlüsselung aktiv*.
+>Die erste Option muss dabei ausgewählt sein, die Zweite nicht, da wir keine 
+Möglichkeit haben die Daten zu entschlüsseln!
 
 ![Screenshot der Netzwerkkonfiguration](https://github.com/xgcssch/SystaComfortPrometheusExporter/raw/main/doc/assets/NetworkSettings.png)
 
@@ -300,7 +301,7 @@ Um *Grafana* weiter zu Konfigurieren führen Sie diese Schritte aus:
 
 1. Wo bekomme ich das *Serviceprogramm Paradigma* her?
 
-   Das Programm kann man nur über den Heizungsbauer oder *Paradigma* direkt erhalten. Mir wurde das Programm freundlicherweise bereits bei der Installation der Heizung von meinem Heizungsbauer zur Verfügung gestellt. Generell bin ich der Ansicht, dass solche Programme genau wie eine Bedienungsanleitung zum Lieferumfang gehören sollten. Falls ihr keinen Kontakt zu einem Heizungsbauer habt, würde ich es direkt über *Paradigma* versuchen zu erhalten. Die Kontaktseite befindet sich [hier.](https://www.paradigma.de/unternehmen/kontakt/)
+   Das Programm kann man bei *Paradigma* direkt herunterladen: https://www.paradigma.de/software/. Es handelt sich dabei um das Programm `SystaService` in der *PC-Software* Kategorie. Ich habe dieses in der Version 1.60 verwendet.
    
 1. Mit welcher *SystaComfort II* Version läuft der Exporter?
 
