@@ -129,14 +129,22 @@ func server(
             case 1:
                 // 0: Fühler Außentemperatur / OK
                 systacomfortOutsideTemperatureCelsius.Set(float64(dp.Values[0]) / 10)
-                // 1: Vorlauf Heizung / OK
+                // 1: Vorlauf Heizung HK1/ OK
                 systacomfortHeatercircuitSupplyTemperatureCelsius.Set(float64(dp.Values[1]) / 10)
-                // 2: Rücklauf Heizung / Looks good, but value does not match S-touch
+                // 2: Rücklauf Heizung HK1 / Looks good, but value does not match S-touch
                 systacomfortHeatercircuitReturnTemperatureCelsius.Set(float64(dp.Values[2]) / 10)
                 // 3=Brauchwasser TWO / OK
                 systacomfortTapwaterTemperatureCelsius.Set(float64(dp.Values[3]) / 10)
+                // 4=Puffertemperatur oben TPO / OK
+                systacomfortTapwaterTemperatureCelsius.Set(float64(dp.Values[4]) / 10)
+                // 5=Puffertemperatur unten TPU / OK
+                systacomfortTapwaterTemperatureCelsius.Set(float64(dp.Values[5]) / 10)
                 // 6=Zirkulation / OK
                 systacomfortCirculationTemperatureCelsius.Set(float64(dp.Values[6]) / 10)
+                // 7: Vorlauf Heizung HK1/ OK
+                systacomfortHeatercircuitSupplyTemperatureCelsius.Set(float64(dp.Values[7]) / 10)
+                // 8: Rücklauf Heizung HK1 / 
+                systacomfortHeatercircuitReturnTemperatureCelsius.Set(float64(dp.Values[8]) / 10)
                 // 9=Raumtemperatur / OK
                 systacomfortInsideTemperatureCelsius.Set(float64(dp.Values[9]) / 10)
                 // 11=Kollektor
@@ -150,13 +158,24 @@ func server(
                 systacomfortTapwaterTargetTemperatureCelsius.Set(float64(dp.Values[22]) / 10)
                 // 23=InnenSoll / OK
                 systacomfortInsideTargetTemperatureCelsius.Set(float64(dp.Values[23]) / 10)
-                // 34=KesselSoll
+                // 24=Vorlauf Heizung Soll HK1/ OK
+                systacomfortHeatercircuitTargetSupplyTemperatureCelsius.Set(float64(dp.Values[24]) / 10)
+                // 26=Raumtemperatur / OK
+                systacomfortInside2TemperatureCelsius.Set(float64(dp.Values[26]) / 10)
+                // 27=Vorlauf Heizung Soll HK2/ OK
+                systacomfortHeatercircuitTargetSupplyTemperatureCelsius.Set(float64(dp.Values[27]) / 10)
+                // 33=Puffer Soll
+                systacomfortBufferTargetTemperatureCelsius.Set(float64(dp.Values[33]) / 10)
+                // 34=Kessel Soll
                 systacomfortBoilerTargetTemperatureCelsius.Set(float64(dp.Values[34]) / 10)
                 // 36=Betriebsart 0=Heiprogramm 1, 1=Heiprogramm 2, 2=Heiprogramm 3, 3=Dauernd Normal, 4=Dauernd Komfort, 5=Dauernd Absenken
                 systacomfortModeInfo.Set(float64(dp.Values[36]))
                 // 39=Raumtemperatur normal (soll)
+                systacomfortInsideNormalTargetTemperatureCelsius.Set(float64(dp.Values[39]))
                 // 40=Raumtemperatur komfort (soll)
+                systacomfortInsideComfortTargetTemperatureCelsius.Set(float64(dp.Values[40]))
                 // 41=Raumtemperatur abgesenkt (soll)
+                systacomfortInsideReducedTargetTemperatureCelsius.Set(float64(dp.Values[41]))
                 // 48=Fusspunkt / OK
                 systacomfortHeatCurveRootPointCelsius.Set(float64(dp.Values[48]) / 10)
                 // 50=Steilheit / OK
@@ -172,10 +191,20 @@ func server(
                 // 59=Spreizung Heizkreis
                 // 60=Minimale Drehzahl Pumpe PHK
                 // 62=Mischer Laufzeit
+                // 70=Sollwert Speicher
+                systacomfortReservoirTargetTemperatureCelsius.Set(float64(dp.Values[70]) / 10)
+                // 78=Raumtemperatur normal HK2 (soll)
+                systacomfortInsideNormal2TargetTemperatureCelsius.Set(float64(dp.Values[78]))
+                // 79=Raumtemperatur komfort HK2 (soll)
+                systacomfortInsideComfort2TargetTemperatureCelsius.Set(float64(dp.Values[79]))
+                // 80=Raumtemperatur abgesenkt HK2 (soll)
+                systacomfortInsideReduced2TargetTemperatureCelsius.Set(float64(dp.Values[80]))
                 // 149=Brauchwassertemperatur normal
                 // 150=Brauchwassertemperatur komfort
                 // 155=Brauchwassertemperatur Schaltdifferenz
                 // 158=Nachlauf Pumpe PK/LP
+                // 156=Maximale Kollektortemperatur
+                //systacomfortSolarpanelMaximumTemperatureCelsius.Set(float64(dp.Values[156]))
                 // 162=Min. Laufzeit Kessel
                 // 169=Nachlaufzeit Pumpe PZ
                 // 171=Zirkulation Schaltdifferenz
@@ -184,6 +213,12 @@ func server(
                 systacomfortBoilerRuntimeSeconds.Set((float64(dp.Values[179])*6 + float64(dp.Values[180])/10) * 60)
                 // 181=Anzahl Brennerstarts / OK
                 systacomfortBoilerStartsTotal.Set(float64(dp.Values[181]))
+                // 182=Solare Leistung
+                systacomfortSolarOutputKWh.Set(float64(dp.Values[182]))
+                // 183=Tagesgewinn Solare Leistung
+                systacomfortSolarOutputDayKWh.Set(float64(dp.Values[183]))
+                // 184=Gesamtgewinn Solare Leistung
+                systacomfortSolarOutputTotalKWh.Set(float64(dp.Values[184]))
                 // 220=Aktive Relais (Bitpattern)
                 //   RelaisHeizkreispumpe    = 0x0001
                 //   RelaisLadepumpe         = 0x0080
