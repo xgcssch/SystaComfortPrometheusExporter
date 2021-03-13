@@ -136,15 +136,15 @@ func server(
                 // 3=Brauchwasser TWO / OK
                 systacomfortTapwaterTemperatureCelsius.Set(float64(dp.Values[3]) / 10)
                 // 4=Puffertemperatur oben TPO / OK
-                systacomfortTapwaterTemperatureCelsius.Set(float64(dp.Values[4]) / 10)
+                systacomfortBufferToplayerTemperatureCelsius.Set(float64(dp.Values[4]) / 10)
                 // 5=Puffertemperatur unten TPU / OK
-                systacomfortTapwaterTemperatureCelsius.Set(float64(dp.Values[5]) / 10)
+                systacomfortBufferBottomlayerTemperatureCelsius.Set(float64(dp.Values[5]) / 10)
                 // 6=Zirkulation / OK
                 systacomfortCirculationTemperatureCelsius.Set(float64(dp.Values[6]) / 10)
-                // 7: Vorlauf Heizung HK1/ OK
-                systacomfortHeatercircuitSupplyTemperatureCelsius.Set(float64(dp.Values[7]) / 10)
-                // 8: Rücklauf Heizung HK1 / 
-                systacomfortHeatercircuitReturnTemperatureCelsius.Set(float64(dp.Values[8]) / 10)
+                // 7: Vorlauf Heizung HK2/ OK
+                systacomfortHeatercircuit2SupplyTemperatureCelsius.Set(float64(dp.Values[7]) / 10)
+                // 8: Rücklauf Heizung HK2 / 
+                systacomfortHeatercircuit2ReturnTemperatureCelsius.Set(float64(dp.Values[8]) / 10)
                 // 9=Raumtemperatur / OK
                 systacomfortInsideTemperatureCelsius.Set(float64(dp.Values[9]) / 10)
                 // 11=Kollektor
@@ -163,7 +163,7 @@ func server(
                 // 26=Raumtemperatur / OK
                 systacomfortInside2TemperatureCelsius.Set(float64(dp.Values[26]) / 10)
                 // 27=Vorlauf Heizung Soll HK2/ OK
-                systacomfortHeatercircuitTargetSupplyTemperatureCelsius.Set(float64(dp.Values[27]) / 10)
+                systacomfortHeatercircuit2TargetSupplyTemperatureCelsius.Set(float64(dp.Values[27]) / 10)
                 // 33=Puffer Soll
                 systacomfortBufferTargetTemperatureCelsius.Set(float64(dp.Values[33]) / 10)
                 // 34=Kessel Soll
