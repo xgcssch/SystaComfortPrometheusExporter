@@ -4,3 +4,4 @@
 Das Panel hat einen *Alert* definiert, welcher bei einer Störung auslöst.\
 Tipp: Grafana lässt sich sehr gut mit *Telegram* verbinden, so dass Störungsmeldungen über Pushnachrichten verschickt werden können.
 - Hinweise zu der Verfügbarkeit einer Modbus TCP Schnittstelle für Hardwareversionen >= 2 ergänzt
+- Werte für systacomfort_solarpanel_return_temperature_celsius und systacomfort_solarpanel_supply_temperature_celsius getauscht
