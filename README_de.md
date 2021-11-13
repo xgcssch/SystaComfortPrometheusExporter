@@ -11,6 +11,12 @@ Als Folge hat ein Anwender, Klaus Schmidinger, die Kommunikation der *SystaComfo
 
 Da dieses sich nicht gut mit üblichen Monitoringtools auswerten lässt, habe ich mich entschlossen einen Exporter für [Prometheus](https://prometheus.io/) zu schreiben. Prometheus ist eine Datenbank spezialisiert auf die Erfassung von Zeitreihen. Die dort abgelegten Daten können dann später mit Tools wie [Grafana](https://grafana.com) analysiert und visualisiert werden.
 
+# *SystaComfort* und Modbus TCP
+Das Projekt verwendt ein kompliziertes und undokumentiertes Verfahren um an die Monitordaten zu kommen. Ein deutlich besserer Ansatz wäre, auf einem offiziell unterstützen Interface aufzusetzen. Glücklicherweise steht dieser Weg allen Anwendern mit einer Hardware Version 2 und höher - Herstellungsdatum ca. 2016 - zur Verfügung. Die Version lässt sich leicht an der Platine erkennen: die Version hat nur einen *LAN* Port, während die Version 2 aufweist. Wenn sie die Version 2 besitzen, dann lässt sich die Steuerung komplett über den *Modbus TCP* Controller abfragen und steuern. 
+
+Weitere Informationen über das *SystaComfort* *Modbus TCP* Interface findet sich [hier](https://mam-prod.paradigma.de/pinaccess/pinaccess.do?pinCode=6om1uCSh0OKd). Um das Interface zu nutzen ist ggf. eine Aktualisierung der Software auf eine akutelle Version notwendig.
+
+Dank an Boris Bartenstein von *Paradigma* für diese Information.
 # Voraussetzungen
 Bevor die Installation durchgeführt werden kann, sollten folgende Punkte sichergestellt sein:
 1. Es muss eine *SystaComfort II* Steuerung vorhanden sein, welche Daten unverschlüsselt Daten an das Remoteportal von Paradigma sendet.
@@ -21,6 +27,11 @@ Bevor die Installation durchgeführt werden kann, sollten folgende Punkte sicher
 
 Alle diese Komponenten können auf kleinen und sparsamen Geräten, wie etwa einem [Rasperry Pi](https://www.raspberrypi.org/) oder einem NAS wie der Synology DiskStation laufen, gerade wenn diese
 auch den Betrieb von Docker Containern erlauben.
+## Getestete Versionen
+Die folgenden Versionen des *SystaComfort* Controllers konnte ich erfolgreich mit der Software betreiben:
+- V1.24
+- V1.26
+
 
 # Installation
 ## Konfiguration des  DNS
