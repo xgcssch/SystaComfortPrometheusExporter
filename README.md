@@ -10,6 +10,12 @@ device: You can use a mobile app called [S-Touch](https://www.paradigma.de/produ
 As a result, Klaus Schmidinger decoded the protocol which every *SystaComfort* Controler sends to the Remote portal. He developed a perl script which decoded the data and produced RRD graphs.
 
 As time goes by and technology advances further, i decided to rewrite the perl script and build an exporter for [Prometheus](https://prometheus.io/), a time-series Database specialized in storing metrics. The data contained in Prometheus can later be viewed and analyzed in tools like [Grafana](https://grafana.com).
+# *SystaComfort* and Modbus TCP
+This project uses a complicated and undocumented method to get access to the monitored data. A much better approach would be to use an offically supported interface. Fortunately this way is open to users of the *SystaComfort* Controller with a hardware version starting at Revision 2 - manufacturing date ~2016. The Revision can easyly be determined with a look at the board. Revision 1 has just one *LAN* connector. Starting with Revision 2 it has two connectors. If you are lucky to have this newer version, you can query and control the unit with an *Modbus TCP* Controller. 
+
+Further information for the *SystaComfort* *Modbus TCP* interface can be found [here](https://mam-prod.paradigma.de/pinaccess/pinaccess.do?pinCode=6om1uCSh0OKd). To use the interface, a software upgrade to the latest version may be required.
+
+Thanks to Boris Bartenstein of *Paradigma* for sharing this information.
 
 # Requirements
 Before you start, be sure you need some things:
@@ -20,6 +26,11 @@ Before you start, be sure you need some things:
 1. A Grafana instance to get the data visualized
 
 All of these software components can be run on small devices like a [Rasperry Pi](https://www.raspberrypi.org/) or a NAS Device like Synology DiskStation capable of running Docker Container.
+
+## Versions known to work
+The following versions of the *SystaComfort* Controller are known to have worked with this software:
+- V1.24
+- V1.26
 
 # Installation
 ## Configure your DNS
