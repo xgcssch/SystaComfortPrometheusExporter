@@ -28,7 +28,7 @@ Before you start, be sure you need some things:
 All of these software components can be run on small devices like a [Rasperry Pi](https://www.raspberrypi.org/) or a NAS Device like Synology DiskStation capable of running Docker Container.
 
 ## Versions known to work
-The following versions of the *SystaComfort* Controller are known to have worked with this hardware/software:
+The following versions of the *SystaComfort* Controller are known to have worked with this hardware/software combinations:
 - HW 1 - V1.24
 - HW 1 - V1.26
 - HW 2 - V2.14
