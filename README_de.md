@@ -28,11 +28,10 @@ Bevor die Installation durchgeführt werden kann, sollten folgende Punkte sicher
 Alle diese Komponenten können auf kleinen und sparsamen Geräten, wie etwa einem [Rasperry Pi](https://www.raspberrypi.org/) oder einem NAS wie der Synology DiskStation laufen, gerade wenn diese
 auch den Betrieb von Docker Containern erlauben.
 ## Getestete Versionen
-Die folgenden Versionen des *SystaComfort* Controllers konnte ich erfolgreich mit der Software betreiben:
-- V1.24
-- V1.26
-
-
+Die folgenden Versionen des *SystaComfort* Controllers konnte erfolgreich mit den folgenden Hardwar/Software Kombinationen betrieben werden:
+- HW 1 - V1.24
+- HW 1 - V1.26
+- HW 2 - V2.14
 # Installation
 ## Konfiguration des  DNS
 Der DNS Name `paradigma.remoteportal.de` muss auf den Server zeigen, auf dem der Exporter läuft. In diesem Beispiel ist das die Adresse `192.168.100.4`.
