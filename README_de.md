@@ -311,7 +311,15 @@ Um *Grafana* weiter zu Konfigurieren führen Sie diese Schritte aus:
 
 1. Wo bekomme ich das *Serviceprogramm Paradigma* her?
 
-   Das Programm kann man bei *Paradigma* direkt herunterladen: https://www.paradigma.de/software/. Es handelt sich dabei um das Programm `SystaService` in der *PC-Software* Kategorie. Ich habe dieses in der Version 1.60 verwendet.
+   ~~Das Programm kann man bei *Paradigma* direkt herunterladen: https://www.paradigma.de/software/. Es handelt sich dabei um das Programm `SystaService` in der *PC-Software* Kategorie. Ich habe dieses in der Version 1.60 verwendet.~~
+   
+   **Update:** Die Webseite ist nur noch für angemeldete Fachbetriebe zugänglich. Allerdings kann man die Software weiterhin über folgendes Downloadportal herunterladen:
+   
+   https://mam-downloadcenter.paradigma.de/page/faq  
+   Suchbegriff: "SystaService CD", bzw [hier](https://mam-downloadcenter.paradigma.de/page/download?assetid=40688&assetname=SystaService%20CD_V160.zip) der Direktdownload.
+   
+   (Hinweis: Firefox lädt die Datei fälschlicherweise als PDF herunter. Falls das passiert einfach die Dateiendung nach dem Download zu `.zip` ändern)
+   
    
 1. Mit welcher *SystaComfort II* Version läuft der Exporter?
 
