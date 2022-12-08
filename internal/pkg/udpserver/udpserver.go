@@ -63,9 +63,9 @@ func server(
     doneChan := make(chan error, 1)
 
     // Setup HTTP handler for Prometheus exporter
-    http.Handle(configuration.PrometheusURL, 
+    http.Handle(configuration.PrometheusURL,
         promhttp.HandlerFor(
-            reg, 
+            reg,
             promhttp.HandlerOpts{}))
 
     s := &http.Server{
@@ -143,10 +143,12 @@ func server(
                 systacomfortCirculationTemperatureCelsius.Set(float64(dp.Values[6]) / 10)
                 // 7: Vorlauf Heizung HK2/ OK
                 systacomfortHeatercircuit2SupplyTemperatureCelsius.Set(float64(dp.Values[7]) / 10)
-                // 8: Rücklauf Heizung HK2 / 
+                // 8: Rücklauf Heizung HK2 /
                 systacomfortHeatercircuit2ReturnTemperatureCelsius.Set(float64(dp.Values[8]) / 10)
                 // 9=Raumtemperatur / OK
                 systacomfortInsideTemperatureCelsius.Set(float64(dp.Values[9]) / 10)
+                // 10=Raumtemperatur HK2 / OK
+                systacomfortInside2TemperatureCelsius.Set(float64(dp.Values[26]) / 10)
                 // 11=Kollektor
                 // 12=KesselRuecklauf / OK
                 var BoilerReturnTemperatureCelsius = float64(dp.Values[12]) / 10
@@ -160,8 +162,6 @@ func server(
                 systacomfortInsideTargetTemperatureCelsius.Set(float64(dp.Values[23]) / 10)
                 // 24=Vorlauf Heizung Soll HK1/ OK
                 systacomfortHeatercircuitTargetSupplyTemperatureCelsius.Set(float64(dp.Values[24]) / 10)
-                // 26=Raumtemperatur / OK
-                systacomfortInside2TemperatureCelsius.Set(float64(dp.Values[26]) / 10)
                 // 27=Vorlauf Heizung Soll HK2/ OK
                 systacomfortHeatercircuit2TargetSupplyTemperatureCelsius.Set(float64(dp.Values[27]) / 10)
                 // 33=Puffer Soll
