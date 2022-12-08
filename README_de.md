@@ -31,9 +31,10 @@ auch den Betrieb von Docker Containern erlauben.
 Die folgenden Versionen des *SystaComfort* Controllers konnte erfolgreich mit den folgenden Hardwar/Software Kombinationen betrieben werden:
 - HW 1 - V1.24
 - HW 1 - V1.26
+- HW 1 - V1.34 (siehe Anmerkung unten)
 - HW 2 - V2.14
 # Installation
-## Konfiguration des  DNS
+## Konfiguration des DNS
 Der DNS Name `paradigma.remoteportal.de` muss auf den Server zeigen, auf dem der Exporter läuft. In diesem Beispiel ist das die Adresse `192.168.100.4`.
 
 Jeder Internet Router hat sein eigenes Verfahren um einen DNS Eintrag zu übersteuern. Manchen Modellen fehlt auch die Möglichkeit, DNS Adressen zu übersteuern.
@@ -70,6 +71,8 @@ Diesen wählt man aus. Dort wiederum befinden sich zwei Checkboxen: *Remoteporta
 Möglichkeit haben die Daten zu entschlüsseln!
 
 ![Screenshot der Netzwerkkonfiguration](https://github.com/xgcssch/SystaComfortPrometheusExporter/raw/main/doc/assets/NetworkSettings.png)
+
+>Bei der Umstellung der *SystaComfort II* Firmware von `1.26` auf `1.34` musste ich zusätzlich direkt an der Heizung, unter dem Punkt `Kontrollprogramm`->`Status abfragen`->`SystaWeb` die Einstellung von `gesperrt` auf `erlaubt` ändern. Diese Option ist offensichtlich neu hinzugekommen und kann weder mit der *S-Touch* noch mit dem Serviceprogramm geändert werden!
 
 # Exporter als Docker Container
 Die einfachste Methode den Exporter zu installieren ist, wenn Sie bereits ein Gerät haben auf welchem eine Containerumgebung wie Docker läuft.
@@ -316,7 +319,7 @@ Um *Grafana* weiter zu Konfigurieren führen Sie diese Schritte aus:
    **Update:** Die Webseite ist nur noch für angemeldete Fachbetriebe zugänglich. Allerdings kann man die Software weiterhin über folgendes Downloadportal herunterladen:
    
    https://mam-downloadcenter.paradigma.de/page/faq  
-   Suchbegriff: "SystaService CD", bzw [hier](https://mam-downloadcenter.paradigma.de/page/download?assetid=40688&assetname=SystaService%20CD_V160.zip) der Direktdownload.
+   Suchbegriff: "SystaService", als Dokumententyp zusätzlich `Software Download` aktivieren. Das Programm findet sich dann in den Sucherergebnis bspw. in dem Download `SystaService CD_V156.zip`.
    
    (Hinweis: Firefox lädt die Datei fälschlicherweise als PDF herunter. Falls das passiert einfach die Dateiendung nach dem Download zu `.zip` ändern)
    
@@ -327,7 +330,9 @@ Um *Grafana* weiter zu Konfigurieren führen Sie diese Schritte aus:
    
    ![Screenshot der Systemversion](https://github.com/xgcssch/SystaComfortPrometheusExporter/raw/main/doc/assets/Systemversion.jpg)
 
-   Die Version wurde letztes Jahr von meinem Heizungsbauer aktualisiert. Ich kann nicht sagen welche Version vorher aktiv war, nur dass diese ebenfalls korrekt Daten geliefert hat.
+   Die Version wurde letztes Jahr von meinem Heizungsbauer aktualisiert. Ich kann nicht sagen welche Version vorher aktiv war, nur dass diese ebenfalls korrekt Daten geliefert hat. Ansonsten findet sich weiter oben eine aktuelle Liste mit Versionen, bei denen es funktioniert.
+   
+   >Bei der Umstellung von `1.26` auf `1.34` musste ich zusätzlich direkt an der Heizung, unter dem Punkt `Kontrollprogramm`->`Status abfragen`->`SystaWeb` die Einstellung von `gesperrt` auf `erlaubt` ändern. Diese Option ist offensichtlich neu hinzugekommen und kann weder mit der `S-Touch` noch mit dem Serviceprogramm geändert werden!
    
 1. Ich habe einen Router, mit dem ich keine DNS Namen anpassen kann (bspw. Fritzbox)
 
