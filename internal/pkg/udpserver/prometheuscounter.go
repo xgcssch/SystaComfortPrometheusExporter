@@ -84,6 +84,11 @@ var (
 		Name: "systacomfort_inside_target_temperature_celsius",
 		Help: "The inside target temperature",
 	})
+	// InnenSoll HK2
+	systacomfortInside2TargetTemperatureCelsius = prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "systacomfort_inside2_target_temperature_celsius",
+		Help: "The inside target temperature Circuit 2",
+	})
 	// Vorlauf Heizung Soll HK1
 	systacomfortHeatercircuitTargetSupplyTemperatureCelsius = prometheus.NewGauge(prometheus.GaugeOpts{
 		Name: "systacomfort_heatercircuit_target_supply_temperature_celsius",
@@ -288,6 +293,7 @@ func registerCounter(registry *prometheus.Registry) {
         systacomfortBoilerReturnTemperatureCelsius,
         systacomfortTapwaterTargetTemperatureCelsius,
         systacomfortInsideTargetTemperatureCelsius,
+		systacomfortInside2TargetTemperatureCelsius,
 		systacomfortHeatercircuitTargetSupplyTemperatureCelsius,
 		systacomfortHeatercircuit2TargetSupplyTemperatureCelsius,
 		systacomfortBufferTargetTemperatureCelsius,
