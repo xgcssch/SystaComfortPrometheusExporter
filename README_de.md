@@ -333,6 +333,7 @@ Um *Grafana* weiter zu Konfigurieren führen Sie diese Schritte aus:
    Die Version wurde letztes Jahr von meinem Heizungsbauer aktualisiert. Ich kann nicht sagen welche Version vorher aktiv war, nur dass diese ebenfalls korrekt Daten geliefert hat. Ansonsten findet sich weiter oben eine aktuelle Liste mit Versionen, bei denen es funktioniert.
    
    >Bei der Umstellung von `1.26` auf `1.34` musste ich zusätzlich direkt an der Heizung, unter dem Punkt `Kontrollprogramm`->`Status abfragen`->`SystaWeb` die Einstellung von `gesperrt` auf `erlaubt` ändern. Diese Option ist offensichtlich neu hinzugekommen und kann weder mit der `S-Touch` noch mit dem Serviceprogramm geändert werden!
+   >Nach einem Stromausfall stand die o. a. Option wieder auf `gesperrt` und musste erneut umgestellt werden. Selbst danach lief es nicht sofort: es musste noch die LAN Verbindung physisch getrennt werden! Erst danach lieferte die Heizung wieder Daten.
    
 1. Ich habe einen Router, mit dem ich keine DNS Namen anpassen kann (bspw. Fritzbox)
 
