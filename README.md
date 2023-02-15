@@ -32,6 +32,7 @@ The following versions of the *SystaComfort* Controller are known to have worked
 - HW 1 - V1.24
 - HW 1 - V1.26
 - HW 2 - V2.14
+- HW 2 - V2.20
 # Installation
 ## Configure your DNS
 The DNS Name `paradigma.remoteportal.de` must point to the device where the exporter is running. In this sample this is the Address `192.168.100.4`.
